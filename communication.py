@@ -39,6 +39,10 @@ def test_connexion():
                 afficheurs[i] = "OK"
                 print(afficheurs)
 
+def update_afficheurs_firmware():
+    for i in range (0, 6):
+        send_with_ack(var.adrMac[i], "U")
+
 def sleep(number):
     data = "black-0-0"
     send_with_ack(var.adrMac[number], data)
@@ -78,4 +82,3 @@ def send_change():
             #print (var.adrMac[jeux+3], data_convert(jeux+3), "                  ")
         var.oldScore[0][jeux] = var.score[0][jeux]
         var.oldScore[1][jeux] = var.score[1][jeux]
-
