@@ -45,6 +45,5 @@ valid = False
 reset = False
 bp=0
 start=0
-update=False
 
 couleurs = ["red","green","blue","purple","yellow","orange","pink","cyan"]

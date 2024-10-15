@@ -38,10 +38,15 @@ print ("Niveau de luminosité :", var.lux)
 print ("Couleur J1 :", var.couleurs[var.color[0]], "Couleur J2 :", var.couleurs[var.color[1]]) 
 print ("Joueur 1", var.score[0], ": Joueur 2", var.score[1], "\r")
 
-if var.update is True:
+f = open("update.txt", "r")
+updateTest = f.read()
+f.close()
+if updateTest is "True":
     # Envoi de U pour Update aux 6 afficheurs
     update_afficheurs_firmware()
-    var.update=False
+    f = open("update.txt", "w")
+    f.write("False")
+    f.close()
     
 while(True):   
     ####################################################

@@ -21,7 +21,9 @@ if BP_RESET_SCORE.value() == True:
     if essais < 10:
         try:
             ugit.pull_all()
-            var.update = True
+            f = open("update.txt", "w")
+            f.write("True")
+            f.close()
         except:
             print("Erreur de mise à jour !")
     else :
