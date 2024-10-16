@@ -9,7 +9,7 @@ wlan.active(True)
 
 BP_RESET_SCORE = Pin(19, Pin.IN, Pin.PULL_DOWN)
 
-if BP_RESET_SCORE.value() is True:
+if BP_RESET_SCORE.value()==1:
     wlan.connect("Marcus","cf08cfa03572")
     essais = 0
     time.sleep(2)
