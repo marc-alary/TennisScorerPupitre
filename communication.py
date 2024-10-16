@@ -20,12 +20,16 @@ for i in range (0, 6):
 #     time.sleep(1)
 
 def send_with_ack(peerAck, dataAck):
-    while(e.send(peerAck, dataAck, True)) is not True:
+    essais = 0
+    while(e.send(peerAck, dataAck, True)) is not True and essais < 3:
+        essais = essais + 1
         time.sleep(0.5)
         print("Erreur com with : ", peerAck)
 
 def test_connexion():
-    while "x" in afficheurs:
+    boucle = 0
+    while boucle < 3:
+        boucle = boucle + 1
         for i in range (0, 6):
             try:
                 e.add_peer(var.adrMac[i])
@@ -38,7 +42,11 @@ def test_connexion():
                 print(i, "Ok")
                 afficheurs[i] = "OK"
                 print(afficheurs)
-
+    if "x" in afficheurs:
+        for i in range (0, 6):
+           if afficheurs[i] == "x":
+               print("Afficheur n°",i," ne répond pas !")
+    
 def update_afficheurs_firmware():
     for i in range (0, 6):
         send_with_ack(var.adrMac[i], "U")
