@@ -41,7 +41,7 @@ print ("Joueur 1", var.score[0], ": Joueur 2", var.score[1], "\r")
 f = open("update.txt", "r")
 updateTest = f.read()
 f.close()
-if updateTest is "True":
+if "True" in updateTest:
     # Envoi de U pour Update aux 6 afficheurs
     update_afficheurs_firmware()
     f = open("update.txt", "w")
