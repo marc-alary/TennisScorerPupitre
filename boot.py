@@ -1,5 +1,4 @@
-# Boot Afficheur
-
+# Boot pupitre
 import ugit
 import network
 import time
@@ -8,10 +7,9 @@ from machine import Pin
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
-f = open("update.txt", "r")
-testUpdate = f.read()
-f.close()
-if testUpdate is "True":
+BP_RESET_SCORE = Pin(19, Pin.IN, Pin.PULL_DOWN)
+
+if BP_RESET_SCORE.value() is True:
     wlan.connect("Marcus","cf08cfa03572")
     essais = 0
     time.sleep(2)
