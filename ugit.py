@@ -25,7 +25,7 @@ password = "cf08cfa03572"
 # CHANGE TO YOUR REPOSITORY INFO
 # Repository must be public if no personal access token is supplied
 user = 'marc-alary'
-repository = 'TennisScorer'
+repository = 'TennisScorerPupitre'
 token = ''
 # Change this variable to 'master' or any other name matching your default branch
 default_branch = 'main'
