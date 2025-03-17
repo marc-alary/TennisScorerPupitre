@@ -1,8 +1,11 @@
 import var
 import time
+from oled_display import *
 from user_inputs import *
-from communication import * 
+from communication import *
+from serial_to_eth import*
 
+version = "20241024"
 etatSystem = "START"
 oldEtatSystem = "RIEN"
 
@@ -15,29 +18,85 @@ class switch(object):
 def case(*args):
     return any((arg == switch.value for arg in args))
 
-f = open("backup.txt", "r")
-sauvegarde = f.read()
-f.close()
-if sauvegarde:
-    var.color[0] = int(sauvegarde[0])
-    var.color[1] = int(sauvegarde[1])
-    var.lux = int(sauvegarde[2])
-    var.score[0][0] = int(sauvegarde[3])
-    var.score[0][1] = int(sauvegarde[4])
-    var.score[0][2] = int(sauvegarde[5])
-    var.score[1][0] = int(sauvegarde[6])
-    var.score[1][1] = int(sauvegarde[7])
-    var.score[1][2] = int(sauvegarde[8])
+def restore():
+    try:
+        f = open("backup.txt", "r")
+        sauvegarde = f.readlines()
+        f.close()
+        if sauvegarde:
+            var.color[0] = int(sauvegarde[0][0])
+            var.color[1] = int(sauvegarde[0][1])
+            var.lux = int(sauvegarde[0][2])
+            var.score[0][0] = int(sauvegarde[1][0])
+            var.score[0][1] = int(sauvegarde[1][1])
+            var.score[0][2] = int(sauvegarde[1][2])
+            var.score[1][0] = int(sauvegarde[1][3])
+            var.score[1][1] = int(sauvegarde[1][4])
+            var.score[1][2] = int(sauvegarde[1][5])
+            setNum = int(sauvegarde[2])
+            setWin[0][0] = int(sauvegarde[3][0])
+            setWin[0][1] = int(sauvegarde[3][1])
+            setWin[0][2] = int(sauvegarde[3][2])
+            setWin[1][0] = int(sauvegarde[3][3])
+            setWin[1][1] = int(sauvegarde[3][4])
+            setWin[1][2] = int(sauvegarde[3][5])
+            etatSystem = sauvegarde[4]
+    except:
+        print("Erreur de sauvagarde !")
+
+def backup():
+    try:
+        f=open('backup.txt', 'w')
+        f.write(str(var.color[0]))
+        f.write(str(var.color[1]))
+        f.write(str(var.lux)+"\n")
+        f.write(str(var.score[0][0]))
+        f.write(str(var.score[0][1]))
+        f.write(str(var.score[0][2]))
+        f.write(str(var.score[1][0]))
+        f.write(str(var.score[1][1]))
+        f.write(str(var.score[1][2])+"\n")
+        f.write(str(var.setNum)+"\n")
+        f.write(str(var.setWin[0][0]))
+        f.write(str(var.setWin[0][1]))
+        f.write(str(var.setWin[0][2]))
+        f.write(str(var.setWin[1][0]))
+        f.write(str(var.setWin[1][1]))
+        f.write(str(var.setWin[1][2])+"\n")
+        f.write(etatSystem)
+        f.close()
+    except:
+        print("Erreur de sauvegarde")
+
+clear_screen()
+write_ligne(" Tennis Scorer ", 1)
+write_ligne(" ------------- ", 2)
+mes="Rev : " + version
+write_ligne(mes, 3)
+write_ligne("Etat afficheurs",4)
+write_ligne("   | | | | |   ",5)
+write_ligne(" ------------- ",6)
+write_ligne("Attente reponse",7)
+write_ligne("afficheurs.....",8)
+
+#init_configuration()
+start_http_server() #start the HTTP page _thread
+#serv_web()
+
+while True:
+    pass
 
 print("Attente des afficheurs ...")
 test_connexion()
 
+restore()
+
 print ("")
-print ("Pupitre TennisScorer V1.0")
+print ("Pupitre TennisScorer Rev: " + version)
 print ("Niveau de luminosité :", var.lux)
 print ("Couleur J1 :", var.couleurs[var.color[0]], "Couleur J2 :", var.couleurs[var.color[1]]) 
 print ("Joueur 1", var.score[0], ": Joueur 2", var.score[1], "\r")
-
+    
 f = open("update.txt", "r")
 updateTest = f.read()
 f.close()
@@ -47,7 +106,9 @@ if "True" in updateTest:
     f = open("update.txt", "w")
     f.write("False")
     f.close()
-    
+
+
+
 while(True):   
     ####################################################
     # Test de l'état du système
@@ -58,6 +119,9 @@ while(True):
         #######################################################
         if case("START"):
             if oldEtatSystem != etatSystem:
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
                 oldEtatSystem = etatSystem
                 var.score = [[0, 0, 0],[0, 0, 0]]                
                 var.setNum = 0
@@ -74,10 +138,16 @@ while(True):
                 var.valid = False
                 etatSystem="COLORJ1"
                 print("Etat système :", etatSystem)
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
             if var.oldScore != var.score:
                 etatSystem="SET 1"
                 var.setNum = 0
                 print("Etat système :", etatSystem)
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
             break
         #######################################################
         # Réglage couleur joueur 1
@@ -98,6 +168,9 @@ while(True):
                         #print(var.adrMac[i], data_convert(i))
             etatSystem="COLORJ2"
             print("Etat système :", etatSystem)
+            clear_ligne(7)
+            clear_ligne(8)
+            write_ligne(etatSystem,7)
             var.valid = False
             break
         #######################################################
@@ -117,6 +190,9 @@ while(True):
                         #print(var.adrMac[i], data_convert(i))
             etatSystem="LUMINOSITE"
             print("Etat système :", etatSystem)
+            clear_ligne(7)
+            clear_ligne(8)
+            write_ligne(etatSystem,7)
             var.valid = False
             break
         #######################################################
@@ -126,20 +202,24 @@ while(True):
             while var.valid is not True:
                 if var.parameters is True:
                     var.parameters = False
-                    if var.lux < 10:
+                    if var.lux < 4:
                         var.lux = var.lux + 1
-                        if var.lux > 9:
+                        if var.lux > 3:
                             var.lux = 0
                         var.oldLux = var.lux
                     sendall_to_everyone()
             var.valid = False
-            f=open('backup.txt', 'w')
-            f.write(str(var.color[0]))
-            f.write(str(var.color[1]))
-            f.write(str(var.lux))
-            f.write("000000")
-            f.close()
             etatSystem="START"
+            try:
+                f = open("backup.txt", "r")
+                sauvegarde = f.readlines()
+                f.write(str(var.color[0]) + str(var.color[1]) + str(var.lux))
+                f.close()
+            except:
+                print("Erreur de sauvegarde")
+            clear_ligne(7)
+            clear_ligne(8)
+            write_ligne(etatSystem,7)
             break
         #######################################################
         # Egalité zéro zéro, début du match premier set
@@ -147,6 +227,9 @@ while(True):
         if case("SET 1"):
             if var.reset == True:
                 etatSystem = "RESET"
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
                 var.reset = False
                 print("Etat système :", etatSystem)
             else:
@@ -161,6 +244,9 @@ while(True):
                         etatSystem="SET 2"
                         var.setNum = 1
                         print("Etat système :", etatSystem)
+                        clear_ligne(7)
+                        clear_ligne(8)
+                        write_ligne(etatSystem,7)
                         awake(1)
                         awake(4)
                     if var.score[j1][var.setNum] < 0:
@@ -175,6 +261,9 @@ while(True):
                 etatSystem="RESET"
                 var.reset = False
                 print("Etat système :", etatSystem)
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
             else:
                 for j1 in range(2):
                     if j1 == 1:
@@ -193,6 +282,10 @@ while(True):
                             awake(2)
                             awake(5)
                         print("Etat système :", etatSystem)
+                        clear_ligne(7)
+                        clear_ligne(8)
+                        write_ligne(etatSystem,7)
+                        var.setNum = 2
                     if var.score[j1][var.setNum] < 0:
                         if var.setWin[j1][var.setNum -1] == 0:
                             var.score[j1][var.setNum] = 0
@@ -215,6 +308,9 @@ while(True):
                 etatSystem="RESET"
                 var.reset = False
                 print("Etat système :", etatSystem)
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
             else:
                 for j1 in range(2):
                     if j1 == 1:
@@ -228,6 +324,9 @@ while(True):
                         if test.count(1) == 2:
                             etatSystem = "VICTORY"
                             print("Etat système :", etatSystem)
+                            clear_ligne(7)
+                            clear_ligne(8)
+                            write_ligne(etatSystem,7)
                     if var.score[j1][var.setNum] < 0:
                         if var.setWin[j1][var.setNum - 1] == 0:
                             var.score[j1][var.setNum] = 0
@@ -238,6 +337,9 @@ while(True):
                             var.setWin[j1][var.setNum -1] = var.setWin[j1][var.setNum - 1] - 1
                             etatSystem="SET 2"
                             print("Etat système :", etatSystem)
+                            clear_ligne(7)
+                            clear_ligne(8)
+                            write_ligne(etatSystem,7)
                             var.setNum = 1
                             sleep(2)
                             sleep(5)
@@ -251,6 +353,9 @@ while(True):
                 etatSystem="RESET"
                 var.reset = False
                 print("Etat système :", etatSystem)
+                clear_ligne(7)
+                clear_ligne(8)
+                write_ligne(etatSystem,7)
             else:
                 for j1 in range(2):
                     if j1 == 1:
@@ -271,9 +376,15 @@ while(True):
                     if var.setNum == 2:
                         etatSystem="SET 3"
                         print("Etat système :", etatSystem)
+                        clear_ligne(7)
+                        clear_ligne(8)
+                        write_ligne(etatSystem,7)
                     if var.setNum == 1:
                         etatSystem="SET 2"
                         print("Etat système :", etatSystem)
+                        clear_ligne(7)
+                        clear_ligne(8)
+                        write_ligne(etatSystem,7)
                 send_change()
             break
         #######################################################
@@ -282,4 +393,7 @@ while(True):
         if case("RESET"):
             oldEtatSystem = etatSystem
             etatSystem = "START"
+            clear_ligne(7)
+            clear_ligne(8)
+            write_ligne(etatSystem,7)
             break

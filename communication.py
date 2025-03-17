@@ -2,6 +2,7 @@ import var
 import time
 import network
 import espnow
+from oled_display import *
 
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
@@ -12,7 +13,7 @@ e.active(True)
 #time.sleep(1)
 
 var.parameters = False
-afficheurs = ["x","x","x","x","x","x"]
+afficheurs = [" "," "," "," "," "," "]
 
 for i in range (0, 6):
     e.add_peer(var.adrMac[i])
@@ -23,30 +24,43 @@ def send_with_ack(peerAck, dataAck):
     essais = 0
     while(e.send(peerAck, dataAck, True)) is not True and essais < 3:
         essais = essais + 1
-        time.sleep(0.5)
+        time.sleep(0.1)
         print("Erreur com with : ", peerAck)
 
+def etat_afficheurs():      
+        message = "  "+afficheurs[0]+"|"\
+          +afficheurs[1]+"|"\
+          +afficheurs[2]+"|"\
+          +afficheurs[3]+"|"\
+          +afficheurs[4]+"|"\
+          +afficheurs[5]+""
+        time.sleep(5)
+        return message
+
 def test_connexion():
-    boucle = 0
-    while boucle < 3:
-        boucle = boucle + 1
+    while " " in afficheurs:
         for i in range (0, 6):
             try:
                 e.add_peer(var.adrMac[i])
             except:
                 print("Afficheur ", i, "déjà connecté !")
-        time.sleep(2)
-        print(afficheurs)
         for i in range (0, 6):
             if (e.send(var.adrMac[i], "black-0-0", True)) is True:
                 print(i, "Ok")
-                afficheurs[i] = "OK"
-                print(afficheurs)
-    if "x" in afficheurs:
-        for i in range (0, 6):
-           if afficheurs[i] == "x":
-               print("Afficheur n°",i," ne répond pas !")
-    
+                afficheurs[i] = "X"
+            else:
+                print("Afficheur n°",i," ne répond pas !")
+            print(afficheurs)
+        clear_ligne(5)
+        message = "  "+afficheurs[0]+"|"\
+          +afficheurs[1]+"|"\
+          +afficheurs[2]+"|"\
+          +afficheurs[3]+"|"\
+          +afficheurs[4]+"|"\
+          +afficheurs[5]+"  "
+        write_ligne(message, 5)
+        time.sleep(5)
+        
 def update_afficheurs_firmware():
     for i in range (0, 6):
         send_with_ack(var.adrMac[i], "U")

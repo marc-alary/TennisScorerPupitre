@@ -4,6 +4,7 @@ import var
 import time
 
 timer = Timer(0)
+TIME_DEBOUNCE=500
 
 def debounce(t):
     var.bp = 0
@@ -14,7 +15,7 @@ def bp_j1_up_isr(pin):
         testJ2 = var.setWin[1]
         if testJ1.count(1) < 2 and testJ2.count(1) < 2:
             var.score[0][var.setNum] = var.score[0][var.setNum] + 1
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1
 
 def bp_j2_up_isr(pin):
@@ -23,37 +24,37 @@ def bp_j2_up_isr(pin):
         testJ2 = var.setWin[1]
         if testJ1.count(1) < 2 and testJ2.count(1) < 2:
             var.score[1][var.setNum] = var.score[1][var.setNum] + 1
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1
    
 def bp_j1_down_isr(pin):
     if var.bp == 0: 
         var.score[0][var.setNum] = var.score[0][var.setNum] - 1
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1
    
 def bp_j2_down_isr(pin):
     if var.bp == 0: 
         var.score[1][var.setNum] = var.score[1][var.setNum] - 1
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1
     
 def bp_parameter_isr(pin):
     if var.bp == 0: 
         var.parameters = True
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1
 
 def bp_valid_isr(pin):
     if var.bp == 0: 
         var.valid = True
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1 
     
 def bp_score_reset_isr(pin):
     if var.bp == 0:
         var.reset = True
-        timer.init(mode=Timer.ONE_SHOT, period=300, callback=debounce)
+        timer.init(mode=Timer.ONE_SHOT, period=TIME_DEBOUNCE, callback=debounce)
         var.bp = var.bp + 1     
 
 def vin_test_isr(pin):
