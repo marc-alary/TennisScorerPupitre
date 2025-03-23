@@ -27,6 +27,11 @@ def clear_screen():
     oled.fill(0)
     oled.show()
 
+def oled_system_state(state):
+    clear_ligne(7)
+    clear_ligne(8)
+    write_ligne(state,7)
+
 def bonjour():
     oled.text('*Tennis Scorer**', 0, 0, 1)
     oled.text(' Version ', 0, 56, 1)

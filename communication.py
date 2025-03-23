@@ -46,11 +46,11 @@ def test_connexion():
                 print("Afficheur ", i, "déjà connecté !")
         for i in range (0, 6):
             if (e.send(var.adrMac[i], "black-0-0", True)) is True:
-                print(i, "Ok")
+                #print(i, "Ok")
                 afficheurs[i] = "X"
             else:
                 print("Afficheur n°",i," ne répond pas !")
-            print(afficheurs)
+            print(f"{afficheurs}", end='\r')
         clear_ligne(5)
         message = "  "+afficheurs[0]+"|"\
           +afficheurs[1]+"|"\
@@ -71,16 +71,16 @@ def sleep(number):
    
 def awake(number):
     if number < 3:
-        data = str(var.couleurs[var.color[0]])+"-"+str(var.score[0][number])+"-"+str(var.lux)
+        data = str(var.couleurs[var.color[0]])+"-"+str(var.score[0][number])+"-"+str(var.userLum)
     if number > 2 and number < 6:
-        data = str(var.couleurs[var.color[1]])+"-"+str(var.score[1][number-3])+"-"+str(var.lux)    
+        data = str(var.couleurs[var.color[1]])+"-"+str(var.score[1][number-3])+"-"+str(var.userLum)    
     send_with_ack(var.adrMac[number], data)
 
 def data_convert(number):
     if number in range(0,3):
-        data = str(var.couleurs[var.color[0]])+"-"+str(var.score[0][number])+"-"+str(var.lux)
+        data = str(var.couleurs[var.color[0]])+"-"+str(var.score[0][number])+"-"+str(var.userLum)
     if number in range (3,6):
-        data = str(var.couleurs[var.color[1]])+"-"+str(var.score[1][number-3])+"-"+str(var.lux)
+        data = str(var.couleurs[var.color[1]])+"-"+str(var.score[1][number-3])+"-"+str(var.userLum)
     return data
 
 def sendall_to_everyone():
@@ -90,17 +90,24 @@ def sendall_to_everyone():
         #print(var.adrMac[afficheur], data_convert(afficheur))
         send_with_ack(var.adrMac[afficheur], data_convert(afficheur))       
 
-def send_change():
-    for jeux in range (3):
-        if var.oldScore[0][jeux] != var.score[0][jeux]:
-            send_with_ack(var.adrMac[jeux], data_convert(jeux))
-            print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \
-            ": J2", var.score[1], var.setWin[1])
+def send_score():
+    check=False
+    for jeux in range(3):
+        for joueur in range(2):
+            if var.oldScore[joueur][jeux] != var.score[joueur][jeux]:
+                check=True
+                if joueur ==0:
+                    send_with_ack(var.adrMac[jeux], data_convert(jeux))
+                if joueur ==1:
+                    send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
+                var.oldScore[joueur][jeux] = var.score[joueur][jeux]
+    if check is True:
+        print("Sauvegarde ....")
+    var.oldSetNum=var.setNum
+            #print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \
+            #": J2", var.score[1], var.setWin[1])
             #print (var.adrMac[jeux], data_convert(jeux), "                  ")
-        if var.oldScore[1][jeux] != var.score[1][jeux]:
-            send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
-            print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \
-            ": J2", var.score[1], var.setWin[1])
-            #print (var.adrMac[jeux+3], data_convert(jeux+3), "                  ")
-        var.oldScore[0][jeux] = var.score[0][jeux]
-        var.oldScore[1][jeux] = var.score[1][jeux]
+
+            #print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \
+            #": J2", var.score[1], var.setWin[1])
+            #print (var.adrMac[jeux+3], data_convert(jeux+3), "                  ")       

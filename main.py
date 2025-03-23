@@ -1,13 +1,25 @@
+# Afficheur V5.0
+# Date mise à jour : 20/03/2025
+# Etat : En cours de rédaction
+# Fonction : augmentation des scores joueurs : ...................... ok
+# Fonction : plus d'augmentation du score en cas de victoire : ...... ok
+# Fonction : gestion des conditions de victoire des sets : .......... ok
+# Fonction : décrémentation du score joueurs : ...................... ok
+# Fonction : décrémentation en cas de victoire : .................... EC
+# Fonction : plus de décrémentation en cas de 0-0 : ................. ok
+# Fonction : gestion conditions de retour en arrière des sets : ..... EC
+# Fonction : gestion des boutons poussoirs : ........................ ok
+# Fonction : sauvegarde des paramètres : ............................ ok
+# Fonction : restauration des paramètres : .......................... ok
+
 import var
 import time
-from oled_display import *
-from user_inputs import *
 from communication import *
-from serial_to_eth import*
+from user_inputs import *
+from oled_display import *
+from game import *
 
-version = "20241024"
-etatSystem = "START"
-oldEtatSystem = "RIEN"
+version = "20250317"
 
 class switch(object):
     value = None
@@ -17,56 +29,6 @@ class switch(object):
 
 def case(*args):
     return any((arg == switch.value for arg in args))
-
-def restore():
-    try:
-        f = open("backup.txt", "r")
-        sauvegarde = f.readlines()
-        f.close()
-        if sauvegarde:
-            var.color[0] = int(sauvegarde[0][0])
-            var.color[1] = int(sauvegarde[0][1])
-            var.lux = int(sauvegarde[0][2])
-            var.score[0][0] = int(sauvegarde[1][0])
-            var.score[0][1] = int(sauvegarde[1][1])
-            var.score[0][2] = int(sauvegarde[1][2])
-            var.score[1][0] = int(sauvegarde[1][3])
-            var.score[1][1] = int(sauvegarde[1][4])
-            var.score[1][2] = int(sauvegarde[1][5])
-            setNum = int(sauvegarde[2])
-            setWin[0][0] = int(sauvegarde[3][0])
-            setWin[0][1] = int(sauvegarde[3][1])
-            setWin[0][2] = int(sauvegarde[3][2])
-            setWin[1][0] = int(sauvegarde[3][3])
-            setWin[1][1] = int(sauvegarde[3][4])
-            setWin[1][2] = int(sauvegarde[3][5])
-            etatSystem = sauvegarde[4]
-    except:
-        print("Erreur de sauvagarde !")
-
-def backup():
-    try:
-        f=open('backup.txt', 'w')
-        f.write(str(var.color[0]))
-        f.write(str(var.color[1]))
-        f.write(str(var.lux)+"\n")
-        f.write(str(var.score[0][0]))
-        f.write(str(var.score[0][1]))
-        f.write(str(var.score[0][2]))
-        f.write(str(var.score[1][0]))
-        f.write(str(var.score[1][1]))
-        f.write(str(var.score[1][2])+"\n")
-        f.write(str(var.setNum)+"\n")
-        f.write(str(var.setWin[0][0]))
-        f.write(str(var.setWin[0][1]))
-        f.write(str(var.setWin[0][2]))
-        f.write(str(var.setWin[1][0]))
-        f.write(str(var.setWin[1][1]))
-        f.write(str(var.setWin[1][2])+"\n")
-        f.write(etatSystem)
-        f.close()
-    except:
-        print("Erreur de sauvegarde")
 
 clear_screen()
 write_ligne(" Tennis Scorer ", 1)
@@ -80,20 +42,16 @@ write_ligne("Attente reponse",7)
 write_ligne("afficheurs.....",8)
 
 #init_configuration()
-start_http_server() #start the HTTP page _thread
+#start_http_server() #start the HTTP page _thread
 #serv_web()
-
-while True:
-    pass
 
 print("Attente des afficheurs ...")
 test_connexion()
-
 restore()
 
 print ("")
 print ("Pupitre TennisScorer Rev: " + version)
-print ("Niveau de luminosité :", var.lux)
+print ("Niveau de luminosité :", var.userLum)
 print ("Couleur J1 :", var.couleurs[var.color[0]], "Couleur J2 :", var.couleurs[var.color[1]]) 
 print ("Joueur 1", var.score[0], ": Joueur 2", var.score[1], "\r")
     
@@ -107,70 +65,61 @@ if "True" in updateTest:
     f.write("False")
     f.close()
 
-
+send_score()
 
 while(True):   
     ####################################################
     # Test de l'état du système
     ####################################################    
-    while switch(etatSystem):  
+    while switch(var.etatSystem):  
         #######################################################
         # Premier set égalité zéro partout, début du match
         #######################################################
-        if case("START"):
-            if oldEtatSystem != etatSystem:
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-                oldEtatSystem = etatSystem
-                var.score = [[0, 0, 0],[0, 0, 0]]                
-                var.setNum = 0
-                var.setWin = [[0, 0, 0],[0, 0, 0]]
-                sendall_to_everyone()
-                var.oldSetNum = 0
-                var.oldScore = [[0, 0, 0],[0, 0, 0]]
+        if case("SET 1"):
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat système :", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
+                awake(0)
+                awake(3)
+            match=up_down_test()
+            if match is "PLUS":
+                var.etatSystem = "SET 2"
+                awake(1)
+                awake(4)
+            if match is "STAY":
+                var.etatSystem = "SET 1"
+            if reset_test() is True:
+                reset_game()
                 sleep(1)
                 sleep(2)
                 sleep(4)
                 sleep(5)
-                print("Etat système START premier passage")
-            if var.valid == True:
-                var.valid = False
-                etatSystem="COLORJ1"
-                print("Etat système :", etatSystem)
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-            if var.oldScore != var.score:
-                etatSystem="SET 1"
-                var.setNum = 0
-                print("Etat système :", etatSystem)
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
+                var.etatSystem = "SET 1"
+            send_score()
             break
         #######################################################
         # Réglage couleur joueur 1
         #######################################################
         if case("COLORJ1"):
             var.score = [[8, 8, 8],[8, 8, 8]]
-            sendall_to_everyone()
-            while var.valid is not True:
-                if var.parameters is True:
-                    var.parameters = False
-                    if var.color[0] <= 7:
-                        var.color[0] = var.color[0] + 1
-                        if var.color[0] > 7:
-                            var.color[0] = 0
-                        var.oldColor[0] = var.color[0]
-                    for i in range(3):
-                        e.send(var.adrMac[i], data_convert(i))
-                        #print(var.adrMac[i], data_convert(i))
-            etatSystem="COLORJ2"
-            print("Etat système :", etatSystem)
-            clear_ligne(7)
-            clear_ligne(8)
-            write_ligne(etatSystem,7)
+            #sendall_to_everyone()
+            while var.BP_VALID.value() != 1:
+                if var.BP_PARAMETERS.value() == 1:
+                    time.sleep_ms(200)
+                    while var.BP_PARAMETERS.value() == 1:
+                        pass
+                        if var.color[0] <= 7:
+                            var.color[0] = var.color[0] + 1
+                            if var.color[0] > 7:
+                                var.color[0] = 0
+                            var.oldColor[0] = var.color[0]
+                        #for i in range(3):
+                            #e.send(var.adrMac[i], data_convert(i))
+                            #print(var.adrMac[i], data_convert(i))
+            var.etatSystem="COLORJ2"
+            print("Etat système :", var.etatSystem)
+            oled_system_state(var.etatSystem)
             var.valid = False
             break
         #######################################################
@@ -186,13 +135,11 @@ while(True):
                             var.color[1] = 0
                         var.oldColor[1] = var.color[1]
                     for i in range(3):
-                        e.send(var.adrMac[i+3], data_convert(i+3))
-                        #print(var.adrMac[i], data_convert(i))
-            etatSystem="LUMINOSITE"
-            print("Etat système :", etatSystem)
-            clear_ligne(7)
-            clear_ligne(8)
-            write_ligne(etatSystem,7)
+                        #e.send(var.adrMac[i+3], data_convert(i+3))
+                        print(var.adrMac[i], data_convert(i))
+            var.etatSystem="LUMINOSITE"
+            print("Etat système :", var.etatSystem)
+            oled_system_state(var.etatSystem)
             var.valid = False
             break
         #######################################################
@@ -202,198 +149,91 @@ while(True):
             while var.valid is not True:
                 if var.parameters is True:
                     var.parameters = False
-                    if var.lux < 4:
-                        var.lux = var.lux + 1
-                        if var.lux > 3:
-                            var.lux = 0
-                        var.oldLux = var.lux
-                    sendall_to_everyone()
+                    if var.userLum < 4:
+                        var.userLum = var.userLum + 1
+                        if var.userLum > 3:
+                            var.userLum = 1
+                        var.oldUserLum = var.userLum
+                    #sendall_to_everyone()
             var.valid = False
-            etatSystem="START"
-            try:
-                f = open("backup.txt", "r")
-                sauvegarde = f.readlines()
-                f.write(str(var.color[0]) + str(var.color[1]) + str(var.lux))
-                f.close()
-            except:
-                print("Erreur de sauvegarde")
-            clear_ligne(7)
-            clear_ligne(8)
-            write_ligne(etatSystem,7)
-            break
-        #######################################################
-        # Egalité zéro zéro, début du match premier set
-        #######################################################
-        if case("SET 1"):
-            if var.reset == True:
-                etatSystem = "RESET"
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-                var.reset = False
-                print("Etat système :", etatSystem)
-            else:
-                for j1 in range(2):
-                    if j1 == 1:
-                        j2 = 0
-                    else:
-                        j2 = j1+1
-                    if (var.score[j1][var.setNum] == 6 and var.score[j2][var.setNum] < 5) \
-                    or var.score[j1][var.setNum] == 7:
-                        var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] + 1
-                        etatSystem="SET 2"
-                        var.setNum = 1
-                        print("Etat système :", etatSystem)
-                        clear_ligne(7)
-                        clear_ligne(8)
-                        write_ligne(etatSystem,7)
-                        awake(1)
-                        awake(4)
-                    if var.score[j1][var.setNum] < 0:
-                        var.score[j1][var.setNum] = 0
-                send_change()
+            var.etatSystem="RESET"
+            var.score = [[0, 0, 0],[0, 0, 0]]                
+            var.setNum = 0
+            var.setWin = [[0, 0, 0],[0, 0, 0]]
+            #backup()
+#             try:
+#                 f = open("backup.txt", "r")
+#                 sauvegarde = f.readlines()
+#                 f.write(str(var.color[0]) + str(var.color[1]) + str(var.userLum))
+#                 f.close()
+#             except:
+#                 print("Erreur de sauvegarde")
+            oled_system_state(var.etatSystem)
             break
         #######################################################
         # Un joueur mène un set à zéro, deuxième set
         #######################################################
         if case("SET 2"):
-            if var.reset == True:
-                etatSystem="RESET"
-                var.reset = False
-                print("Etat système :", etatSystem)
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-            else:
-                for j1 in range(2):
-                    if j1 == 1:
-                        j2 = 0
-                    else:
-                        j2 = j1+1
-                    if (var.score[j1][var.setNum] == 6 and var.score[j2][var.setNum] < 5) \
-                    or var.score[j1][var.setNum] == 7:
-                        var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] + 1
-                        test = var.setWin[j1]
-                        if test.count(1) == 2:
-                            etatSystem="VICTORY"
-                        else:
-                            etatSystem="SET 3"
-                            var.setNum = 2
-                            awake(2)
-                            awake(5)
-                        print("Etat système :", etatSystem)
-                        clear_ligne(7)
-                        clear_ligne(8)
-                        write_ligne(etatSystem,7)
-                        var.setNum = 2
-                    if var.score[j1][var.setNum] < 0:
-                        if var.setWin[j1][var.setNum -1] == 0:
-                            var.score[j1][var.setNum] = 0
-                        if var.setWin[j1][var.setNum -1] == 1:
-                            var.score[j1][var.setNum] = 0
-                            var.score[j2][var.setNum] = 0
-                            var.score[j1][var.setNum -1] = var.score[j1][var.setNum -1] - 1
-                            var.setWin[j1][var.setNum -1] = var.setWin[j1][var.setNum -1] - 1
-                            etatSystem="SET 1"
-                            var.setNum = 0
-                            sleep(1)
-                            sleep(4)
-                send_change()
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat systeme : ", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
+            match=up_down_test()
+            if match is "PLUS":
+                var.etatSystem = "SET 3"
+                awake(2)
+                awake(5)
+            if match is "VICTORY":
+                var.etatSystem = "VICTORY"
+            if match is "MOINS":
+                var.etatSystem = "SET 1"
+                sleep(1)
+                sleep(4)
+            if reset_test() is True:
+                reset_game()
+                sleep(1)
+                sleep(4)
+                sleep(2)
+                sleep(5)
+                var.etatSystem = "SET 1"
+            send_score()
             break
         #######################################################
         # Egalité un Set partout, troisième et dernier set
         #######################################################
         if case("SET 3"):
-            if var.reset == True:
-                etatSystem="RESET"
-                var.reset = False
-                print("Etat système :", etatSystem)
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-            else:
-                for j1 in range(2):
-                    if j1 == 1:
-                        j2 = 0
-                    else:
-                        j2 = j1+1
-                    if (var.score[j1][var.setNum] == 6 and var.score[j2][var.setNum] < 5) \
-                    or var.score[j1][var.setNum] == 7:
-                        var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] + 1
-                        test = var.setWin[j1]
-                        if test.count(1) == 2:
-                            etatSystem = "VICTORY"
-                            print("Etat système :", etatSystem)
-                            clear_ligne(7)
-                            clear_ligne(8)
-                            write_ligne(etatSystem,7)
-                    if var.score[j1][var.setNum] < 0:
-                        if var.setWin[j1][var.setNum - 1] == 0:
-                            var.score[j1][var.setNum] = 0
-                        if var.setWin[j1][var.setNum - 1] == 1:
-                            var.score[j1][var.setNum] = 0
-                            var.score[j2][var.setNum] = 0
-                            var.score[j1][var.setNum - 1] = var.score[j1][var.setNum -1] - 1
-                            var.setWin[j1][var.setNum -1] = var.setWin[j1][var.setNum - 1] - 1
-                            etatSystem="SET 2"
-                            print("Etat système :", etatSystem)
-                            clear_ligne(7)
-                            clear_ligne(8)
-                            write_ligne(etatSystem,7)
-                            var.setNum = 1
-                            sleep(2)
-                            sleep(5)
-                send_change()
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat systeme : ", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
+            match=up_down_test()
+            if match is "VICTORY":
+                var.etatSystem = "VICTORY"
+            if match is "MOINS":
+                var.etatSystem = "SET 2"
+                sleep(2)
+                sleep(5)
+            if reset_test() is True:
+                reset_game()
+                sleep(1)
+                sleep(4)
+                sleep(2)
+                sleep(5)
+                var.etatSystem = "SET 1"
+            send_score()
             break
         #######################################################
         # Victoire d'un joueur fin du match
         #######################################################
-        if case("VICTORY"):    
-            if var.reset == True:
-                etatSystem="RESET"
-                var.reset = False
-                print("Etat système :", etatSystem)
-                clear_ligne(7)
-                clear_ligne(8)
-                write_ligne(etatSystem,7)
-            else:
-                for j1 in range(2):
-                    if j1 == 1:
-                        j2 = 0
-                    else:
-                        j2 = j1+1          
-                    if var.setWin[j1][var.setNum] == 0:
-                        if var.score[j1][var.setNum] < 0:
-                            var.score[j1][var.setNum] = 0
-                    if var.setWin[j1][var.setNum] == 1:
-                        if (var.score[j1][var.setNum] == 5 and var.score[j2][var.setNum] < 5)\
-                        or (var.score[j1][var.setNum] == 6 and (var.score[j2][var.setNum] ==6 \
-                        or var.score[j2][var.setNum] ==5)): 
-                            var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] - 1
-                test1 = var.setWin[0]
-                test2 = var.setWin[1]
-                if test1.count(1) < 2 and test2.count(1) < 2:
-                    if var.setNum == 2:
-                        etatSystem="SET 3"
-                        print("Etat système :", etatSystem)
-                        clear_ligne(7)
-                        clear_ligne(8)
-                        write_ligne(etatSystem,7)
-                    if var.setNum == 1:
-                        etatSystem="SET 2"
-                        print("Etat système :", etatSystem)
-                        clear_ligne(7)
-                        clear_ligne(8)
-                        write_ligne(etatSystem,7)
-                send_change()
-            break
-        #######################################################
-        # Victoire d'un joueur fin du match
-        #######################################################
-        if case("RESET"):
-            oldEtatSystem = etatSystem
-            etatSystem = "START"
-            clear_ligne(7)
-            clear_ligne(8)
-            write_ligne(etatSystem,7)
+        if case("VICTORY"):
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat systeme : ", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
+            if reset_test() is True:
+                reset_game()
+                var.etatSystem = "SET 1"               
+            if up_down_test() is "MOINS":
+                var.etatSystem = "SET 3"   
+            send_score()
             break
