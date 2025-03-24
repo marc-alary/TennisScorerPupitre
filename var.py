@@ -39,7 +39,7 @@ userLum = 1
 oldUserLum = 0
 
 # Variables boutons poussoirs
-parameter = True
+parameter = False
 oldParameter = False
 valid = False
 reset = False

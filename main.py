@@ -3,14 +3,15 @@
 # Etat : En cours de rédaction
 # Fonction : augmentation des scores joueurs : ...................... ok
 # Fonction : plus d'augmentation du score en cas de victoire : ...... ok
-# Fonction : gestion des conditions de victoire des sets : .......... ok
+# Fonction : gestion des conditions de victoire des 3 sets : ........ ok
 # Fonction : décrémentation du score joueurs : ...................... ok
-# Fonction : décrémentation en cas de victoire : .................... EC
+# Fonction : décrémentation possible en cas de victoire : ........... ok
 # Fonction : plus de décrémentation en cas de 0-0 : ................. ok
-# Fonction : gestion conditions de retour en arrière des sets : ..... EC
+# Fonction : gestion conditions de retour en arrière des 3 sets : ... ok
 # Fonction : gestion des boutons poussoirs : ........................ ok
 # Fonction : sauvegarde des paramètres : ............................ ok
 # Fonction : restauration des paramètres : .......................... ok
+# Fonction : gestion choix des couleurs et de la luminosité : ....... ok
 
 import var
 import time
@@ -19,7 +20,7 @@ from user_inputs import *
 from oled_display import *
 from game import *
 
-version = "20250317"
+version = "20250321"
 
 class switch(object):
     value = None
@@ -87,87 +88,71 @@ while(True):
                 var.etatSystem = "SET 2"
                 awake(1)
                 awake(4)
-            if match is "STAY":
-                var.etatSystem = "SET 1"
+            if parameter_test() is True and zero_test() is True: # Appui sur couleur
+                var.etatSystem = "COLORJ1"
             if reset_test() is True:
-                reset_game()
-                sleep(1)
-                sleep(2)
-                sleep(4)
-                sleep(5)
-                var.etatSystem = "SET 1"
+                var.etatSystem = "RESET"
             send_score()
             break
         #######################################################
         # Réglage couleur joueur 1
         #######################################################
         if case("COLORJ1"):
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat système :", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
             var.score = [[8, 8, 8],[8, 8, 8]]
-            #sendall_to_everyone()
-            while var.BP_VALID.value() != 1:
-                if var.BP_PARAMETERS.value() == 1:
+            sendall_to_everyone()
+            while parameter_test() is False:
+                if valid_test() is True:
                     time.sleep_ms(200)
-                    while var.BP_PARAMETERS.value() == 1:
-                        pass
-                        if var.color[0] <= 7:
-                            var.color[0] = var.color[0] + 1
-                            if var.color[0] > 7:
-                                var.color[0] = 0
-                            var.oldColor[0] = var.color[0]
-                        #for i in range(3):
-                            #e.send(var.adrMac[i], data_convert(i))
-                            #print(var.adrMac[i], data_convert(i))
+                    if var.color[0] <= 7:
+                        var.color[0] = var.color[0] + 1
+                        if var.color[0] > 7:
+                            var.color[0] = 0
+                        var.oldColor[0] = var.color[0]
+                    for i in range(3):
+                        e.send(var.adrMac[i], data_convert(i))
+                        #print(var.adrMac[i], data_convert(i))
             var.etatSystem="COLORJ2"
             print("Etat système :", var.etatSystem)
             oled_system_state(var.etatSystem)
-            var.valid = False
             break
         #######################################################
         # Réglage couleur joueur 2
         #######################################################
         if case("COLORJ2"):
-            while var.valid is not True:
-                if var.parameters is True:
-                    var.parameters = False
+            while parameter_test() is False:
+                if valid_test() is True:
+                    time.sleep_ms(200)
                     if var.color[1] <= 7:
                         var.color[1] = var.color[1] + 1
                         if var.color[1] > 7:
                             var.color[1] = 0
                         var.oldColor[1] = var.color[1]
                     for i in range(3):
-                        #e.send(var.adrMac[i+3], data_convert(i+3))
-                        print(var.adrMac[i], data_convert(i))
+                        e.send(var.adrMac[i+3], data_convert(i+3))
+                        #print(var.adrMac[i], data_convert(i))
             var.etatSystem="LUMINOSITE"
             print("Etat système :", var.etatSystem)
             oled_system_state(var.etatSystem)
-            var.valid = False
             break
         #######################################################
         # Réglage lumisoité joueurs 1 et 2
         #######################################################
         if case("LUMINOSITE"):
-            while var.valid is not True:
-                if var.parameters is True:
-                    var.parameters = False
+            while parameter_test() is False:
+                if valid_test() is True:
+                    time.sleep_ms(200)
                     if var.userLum < 4:
                         var.userLum = var.userLum + 1
                         if var.userLum > 3:
                             var.userLum = 1
                         var.oldUserLum = var.userLum
-                    #sendall_to_everyone()
-            var.valid = False
+                    sendall_to_everyone()
             var.etatSystem="RESET"
-            var.score = [[0, 0, 0],[0, 0, 0]]                
-            var.setNum = 0
-            var.setWin = [[0, 0, 0],[0, 0, 0]]
-            #backup()
-#             try:
-#                 f = open("backup.txt", "r")
-#                 sauvegarde = f.readlines()
-#                 f.write(str(var.color[0]) + str(var.color[1]) + str(var.userLum))
-#                 f.close()
-#             except:
-#                 print("Erreur de sauvegarde")
+            backup()
             oled_system_state(var.etatSystem)
             break
         #######################################################
@@ -190,12 +175,7 @@ while(True):
                 sleep(1)
                 sleep(4)
             if reset_test() is True:
-                reset_game()
-                sleep(1)
-                sleep(4)
-                sleep(2)
-                sleep(5)
-                var.etatSystem = "SET 1"
+                var.etatSystem = "RESET"
             send_score()
             break
         #######################################################
@@ -214,12 +194,7 @@ while(True):
                 sleep(2)
                 sleep(5)
             if reset_test() is True:
-                reset_game()
-                sleep(1)
-                sleep(4)
-                sleep(2)
-                sleep(5)
-                var.etatSystem = "SET 1"
+                var.etatSystem = "RESET"
             send_score()
             break
         #######################################################
@@ -230,10 +205,20 @@ while(True):
                 print("Etat systeme : ", var.etatSystem)
                 oled_system_state(var.etatSystem)
                 var.oldEtatSystem = var.etatSystem
-            if reset_test() is True:
-                reset_game()
-                var.etatSystem = "SET 1"               
             if up_down_test() is "MOINS":
-                var.etatSystem = "SET 3"   
+                var.etatSystem = "SET 3"
+            if reset_test() is True:
+                var.etatSystem = "RESET"
             send_score()
+            break
+        #######################################################
+        # Remise à zéro du score
+        #######################################################
+        if case("RESET"):
+            if var.oldEtatSystem != var.etatSystem:
+                print("Etat systeme : ", var.etatSystem)
+                oled_system_state(var.etatSystem)
+                var.oldEtatSystem = var.etatSystem
+            reset_game()
+            var.etatSystem = "SET 1"
             break

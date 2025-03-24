@@ -37,8 +37,6 @@ def backup():
 #         or var.userLum != varOldUserLum or var.setNum != var.oldSetNum :
 #             difference=difference + 1
 #     if difference != 0:
-        print("KIKI !")
-
 #         try:
 #             f=open('backup.txt', 'w')           
 #             f.write(str(var.color[0]))
@@ -72,6 +70,7 @@ def zero_test():
         for element in ligne:
             if element != 0:
                 return False
+    var.j1Dn = var.j2Dn = False
     return True
 
 def win_test():
@@ -80,6 +79,7 @@ def win_test():
     winJ2=var.setWin[1][0]+var.setWin[1][1]+var.setWin[1][2]
     # Si ce n'est pas le cas on peut augmenter les score
     if winJ1 == 2 or winJ2 == 2:
+        var.j1Up = var.j2Up = False
         return True
     return False
 
@@ -106,19 +106,20 @@ def down_gestion(j1,j2):
         if var.setWin[j1][var.setNum] ==1:
             # on diminue le score mais ...
             var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1
-            if var.score[j1][var.setNum] < 0:
-                var.score[j1][var.setNum]=0
             var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] - 1
             etat = "MOINS"
-    if (var.etatSystem is "SET 2" or var.etatSystem is "SET 3") \
-       and var.setWin[j1][var.setNum-1] ==1:
-        var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1
-        if var.score[j1][var.setNum] < 0:
-            var.score[j1][var.setNum]=0
+    if (var.etatSystem is "SET 2" or var.etatSystem is "SET 3"):
+        var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1        
+        if var.score[j1][var.setNum] < 0 and var.setWin[j1][var.setNum-1] ==1:
+            var.score[j1][var.setNum] = 0
             var.score[j2][var.setNum] = 0
             var.setNum = var.setNum - 1
+            if var.score[j1][var.setNum] > 5:
+                var.score[j1][var.setNum]=5
             var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] - 1
             etat="MOINS"
+        elif var.score[j1][var.setNum] < 0:
+            var.score[j1][var.setNum] = 0
     if var.etatSystem is "SET 1":
         var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1
         if var.score[j1][var.setNum] < 0:
@@ -132,10 +133,26 @@ def reset_test():
         return True
     return False
 
+def parameter_test():
+    if var.parameter is True:
+        var.parameter = False
+        return True
+    return False
+
+def valid_test():
+    if var.valid is True:
+        var.valid = False
+        return True
+    return False
+
 def reset_game():
-    var.score = [[0, 0, 0],[0, 0, 0]]                
+    var.score = [[0, 0, 0],[0, 0, 0]] 
+    var.oldScore = [[0, 0, 0],[0, 0, 0]]                
     var.setNum = 0
-    var.setWin = [[0, 0, 0],[0, 0, 0]]
+    var.oldSetNum = 0
+    var.setWin = [[0, 0, 0],[0, 0, 0]] 
+    var.oldSetWin = [[0, 0, 0],[0, 0, 0]]
+    sendall_to_everyone()
     sleep(1)
     sleep(2)
     sleep(4)
@@ -146,15 +163,19 @@ def up_down_test():
     if win_test() is False :
         if var.j1Up is True:
             var.j1Up = False
-            suite=up_gestion(0,1)   
+            #var.j1Dn = var.j2Up = var.j2Dn = False
+            suite=up_gestion(0,1)
         if var.j2Up is True:
             var.j2Up = False
+            #var.j1Dn = var.j1Up = var.j2Dn = False
             suite=up_gestion(1,0)
     if zero_test() is False:
         if var.j1Dn is True:
             var.j1Dn = False
+            #var.j1Up = var.j2Up = var.j2Dn = False
             suite = down_gestion(0,1)    
         if var.j2Dn is True:
             var.j2Dn = False
+            #var.j1Dn = var.j2Up = var.j1Up = False
             suite = down_gestion(1,0)
     return suite
