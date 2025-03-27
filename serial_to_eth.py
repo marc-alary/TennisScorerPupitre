@@ -2,6 +2,7 @@ from machine import UART, Pin
 import time
 import var
 import _thread
+import uasyncio
 
 uart = UART(1, baudrate=9600, tx=Pin(27), rx=Pin(26))
 
@@ -29,6 +30,7 @@ EOL = '\r\n'
 HEADER_BODY_SEPARATOR = EOL+EOL
 
 def build_response():
+    print("Score actualisé : ", var.score)
     #date = "Thu, 21 may 2024 11:07:32 GMT" 
     #server = "ESP32"
     #connection = "close"
@@ -42,7 +44,6 @@ def build_response():
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Tableau des scores</title>
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
             <style>
             body {
                 background-image: rgb(255, 255, 255)
@@ -105,14 +106,13 @@ def build_response():
                 </tr>
             </table>
             </div>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="/jquery-3.7.1.min.js"></script>
             <script>
-                $(document).ready(function () {
-
-                    setInterval( function() {
+                $(document).ready(function() {
+                    // Rafraîchissement toutes les 1000 ms (1 seconde)
+                    setInterval(function() {
                         $("#tablerefresh").load(location.href + " #refr");
-                     }, 1000 );
-
+                    }, 5000);
                 });
             </script>
         </body>
@@ -131,8 +131,6 @@ def build_response():
     length_buff = len(buff)
     return buff, length_buff    
     
-
-
 #The header and the body are supposed to be separated by \r\n\r\n (section 4.1 of RFC 2616)
 def checkHeaderComplete(data) :
     if (data.find(HEADER_BODY_SEPARATOR.encode()) > 0) :
@@ -146,7 +144,6 @@ def serv_web():
     global printData
     global transmitInProgress
     global lenWrite
-
 
     while headerFound == False:
         if uart.any() > 0 :
@@ -186,12 +183,13 @@ def answer(question):
         print("Pas de réponse !")
 
 def preparing_to_send_serv_web():
-    while True :
-        time.sleep(0.1)
-        if uart.any() > 0 :
-            serv_web()
-            print('send')
-        
+    if var.check is True:
+        while True :
+            time.sleep(0.1)
+            if uart.any() > 0 :
+                serv_web()
+                print('send')
+         
 def start_http_server():
     _thread.start_new_thread(preparing_to_send_serv_web, ())
     
@@ -254,105 +252,3 @@ def init_configuration():
     CFG.value(1)
     time.sleep(2)
     print("end configuration")
-
-# TX_pin = 27
-# RX_pin = 26
-# # INIT HARDWARE
-# uart2 = UART(2, baudrate=9600, tx=Pin(TX_pin), rx=Pin(RX_pin))
-# #uart0 = UART(0, baudrate=9600, tx=Pin(1), rx=Pin(3))
-# CFG = Pin(23, Pin.OUT,Pin.PULL_UP)
-# RST = Pin(14, Pin.OUT)
-# RST.value(1)
-# time.sleep(1)
-# RST.value(0)
-# time.sleep(1)
-# RST.value(1)
-# 
-# MODE = 0  #0:TCP Server 1:TCP Client 2:UDP Server 3:UDP Client
-# GATEWAY = (192, 168, 0, 10)   # GATEWAY
-# TARGET_IP = (192, 168, 0, 10)# TARGET_IP
-# LOCAL_IP = (192, 168, 0, 20)    # LOCAL_IP
-# SUBNET_MASK = (255,255,255,0) # SUBNET_MASK
-# LOCAL_PORT1 = 5000             # LOCAL_PORT
-# TARGET_PORT = 80             # TARGET_PORT
-# BAUD_RATE = 115200           # BAUD_RATE
-# 
-# def init_configuration() :
-#     print("begin configuration")
-#     CFG.value(0)
-#     time.sleep(1)   
-# #     if uart2.read() is None :
-# #         var.Error = 'UART/ETH = 0'
-# #         time.sleep(1)
-# #     time.sleep(0.75)
-#     try:
-#         uart2.write(b'\x57\xab\x10'+MODE.to_bytes(1, 'little')) #Le mode      
-#         time.sleep(0.5)
-#         print(uart2.read())
-#         uart2.write(b'\x57\xab\x11'+bytes(bytearray(LOCAL_IP))) # ip locale
-#         time.sleep(0.5)
-#         print("IP locale: " +str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x12'+bytes(bytearray(SUBNET_MASK))) # masque ss reseau
-#         time.sleep(0.5)
-#         print("masque sous reseau: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x13'+bytes(bytearray(GATEWAY))) #@ gateway
-#         time.sleep(0.5)
-#         print("Gateway: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x14'+LOCAL_PORT1.to_bytes(2, 'little')) #num port1 local
-#         time.sleep(0.5)
-#         print("local port: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x15'+bytes(bytearray(TARGET_IP))) # ip distante
-#         time.sleep(0.5)
-#         print("IP destinataire: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x16'+TARGET_PORT.to_bytes(2, 'little')) # num port distant
-#         time.sleep(0.5)
-#         print("num port distant: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x21'+BAUD_RATE.to_bytes(4, 'little')) # baud serial
-#         time.sleep(0.5)
-#         print("baud rate: "+str(uart2.read()))
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x0D') # save in eeprom
-#         time.sleep(0.5)
-#         print(uart2.read())
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x0E') # execute conf and reset
-#         time.sleep(0.5)
-#         print(uart2.read())
-#         time.sleep(0.5)
-#         uart2.write(b'\x57\xab\x5E') #leave serial port configuration mode
-#         time.sleep(0.5)
-#         print(uart2.read())
-#         time.sleep(0.5)
-#         CFG.value(1)
-#         time.sleep(0.5)
-# 
-#         uart2.init(baudrate=115200, tx=Pin(TX_pin), rx=Pin(RX_pin))
-#         time.sleep(0.5)
-#         print("end configuration")
-#         time.sleep(0.5)
-        
-#     except OSError as e:
-#         print("Configuration error: ", e)
-#         var.Error = 'Error_config'
-#         OledO1.Error_Display()
-        
-
-    
-"""
-uart2.write(b'\x57\xAB\x61') # get ip locale
-time.sleep(0.5)
-print("IP locale :")
-print(uart2.read())
-time.sleep(0.5)
-uart2.write(b'\x57\xAB\x81') #get mac address
-time.sleep(0.5)
-print("@ MAC locale :")
-print(uart2.read())
-time.sleep(0.5)
-"""

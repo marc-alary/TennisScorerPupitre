@@ -29,6 +29,7 @@ def restore():
         print(f"Erreur : {e}")
 
 def backup():
+    pass
 #     for jeux in range(3):
 #         if var.oldScore[0][jeux] != var.score[0][jeux] \
 #         or var.oldScore[1][jeux] != var.score[1][jeux]:
@@ -107,7 +108,10 @@ def down_gestion(j1,j2):
             # on diminue le score mais ...
             var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1
             var.setWin[j1][var.setNum] = var.setWin[j1][var.setNum] - 1
-            etat = "MOINS"
+            if var.setNum == 2:
+                etat = "SET 3"
+            if var.setNum == 1:
+                etat = "SET 2"
     if (var.etatSystem is "SET 2" or var.etatSystem is "SET 3"):
         var.score[j1][var.setNum] = var.score[j1][var.setNum] - 1        
         if var.score[j1][var.setNum] < 0 and var.setWin[j1][var.setNum-1] ==1:

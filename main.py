@@ -19,6 +19,7 @@ from communication import *
 from user_inputs import *
 from oled_display import *
 from game import *
+from serial_to_eth import *
 
 version = "20250321"
 
@@ -42,10 +43,6 @@ write_ligne(" ------------- ",6)
 write_ligne("Attente reponse",7)
 write_ligne("afficheurs.....",8)
 
-#init_configuration()
-#start_http_server() #start the HTTP page _thread
-#serv_web()
-
 print("Attente des afficheurs ...")
 test_connexion()
 restore()
@@ -68,7 +65,12 @@ if "True" in updateTest:
 
 send_score()
 
-while(True):   
+#init_configuration()
+# Démarrer la boucle principale
+start_http_server() #start the HTTP page _thread
+#preparing_to_send_serv_web()
+
+while(True):
     ####################################################
     # Test de l'état du système
     ####################################################    
@@ -83,6 +85,10 @@ while(True):
                 var.oldEtatSystem = var.etatSystem
                 awake(0)
                 awake(3)
+                sleep(1)
+                sleep(2)
+                sleep(4)
+                sleep(5)
             match=up_down_test()
             if match is "PLUS":
                 var.etatSystem = "SET 2"
@@ -205,8 +211,11 @@ while(True):
                 print("Etat systeme : ", var.etatSystem)
                 oled_system_state(var.etatSystem)
                 var.oldEtatSystem = var.etatSystem
-            if up_down_test() is "MOINS":
+            match=up_down_test()
+            if match is "SET 3":
                 var.etatSystem = "SET 3"
+            if match is "SET 2":
+                var.etatSystem = "SET 2"
             if reset_test() is True:
                 var.etatSystem = "RESET"
             send_score()

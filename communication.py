@@ -3,6 +3,7 @@ import time
 import network
 import espnow
 from oled_display import *
+from serial_to_eth import *
 
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
@@ -91,17 +92,17 @@ def sendall_to_everyone():
         send_with_ack(var.adrMac[afficheur], data_convert(afficheur))       
 
 def send_score():
-    check=False
+    var.check=False
     for jeux in range(3):
         for joueur in range(2):
             if var.oldScore[joueur][jeux] != var.score[joueur][jeux]:
-                check=True
+                var.check=True
                 if joueur ==0:
                     send_with_ack(var.adrMac[jeux], data_convert(jeux))
                 if joueur ==1:
                     send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
                 var.oldScore[joueur][jeux] = var.score[joueur][jeux]
-    if check is True:
+    if var.check is True:
         print("Sauvegarde ....")
     var.oldSetNum=var.setNum
             #print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \

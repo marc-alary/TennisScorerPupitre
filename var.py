@@ -52,5 +52,6 @@ j2Dn = False
 # Variables état système
 etatSystem="SET 1"
 oldEtatSystem="RIEN"
+check=False
 
 couleurs = ["red","green","blue","purple","yellow","orange","pink","cyan"]
