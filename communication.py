@@ -99,8 +99,20 @@ def send_score():
                 var.check=True
                 if joueur ==0:
                     send_with_ack(var.adrMac[jeux], data_convert(jeux))
+                    try:
+                        message = construire_score()
+                        uart.write(message.encode())  # Envoi vers le CH9121
+                        print("📤 Score envoyé via UART (CH9121):", message)
+                    except Exception as e:
+                        print("❌ Erreur UART:", e)
                 if joueur ==1:
                     send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
+                    try:
+                        message = construire_score()
+                        uart.write(message.encode())  # Envoi vers le CH9121
+                        print("📤 Score envoyé via UART (CH9121):", message)
+                    except Exception as e:
+                        print("❌ Erreur UART:", e)
                 var.oldScore[joueur][jeux] = var.score[joueur][jeux]
     if var.check is True:
         print("Sauvegarde ....")

@@ -65,10 +65,13 @@ if "True" in updateTest:
 
 send_score()
 
-#init_configuration()
-# Démarrer la boucle principale
-start_http_server() #start the HTTP page _thread
-#preparing_to_send_serv_web()
+# f = open("run_number.txt", "r")
+# var.firstRun = f.read()
+# f.close()
+# if "True" in var.firstRun:
+    # Première mise sous trension
+
+init_configuration()
 
 while(True):
     ####################################################

@@ -53,5 +53,6 @@ j2Dn = False
 etatSystem="SET 1"
 oldEtatSystem="RIEN"
 check=False
+firstRun=True
 
 couleurs = ["red","green","blue","purple","yellow","orange","pink","cyan"]
