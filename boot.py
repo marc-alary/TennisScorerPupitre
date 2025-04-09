@@ -3,6 +3,7 @@ import ugit
 import network
 import time
 from machine import Pin
+from oled_display import *
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
