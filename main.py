@@ -26,7 +26,7 @@ from oled_display import *
 from game import *
 from serial_to_eth import *
 
-version = "20250321"
+version = "20250409"
 
 class switch(object):
     value = None
