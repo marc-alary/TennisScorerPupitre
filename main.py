@@ -1,17 +1,22 @@
 # Afficheur V5.0
-# Date mise à jour : 20/03/2025
-# Etat : En cours de rédaction
-# Fonction : augmentation des scores joueurs : ...................... ok
-# Fonction : plus d'augmentation du score en cas de victoire : ...... ok
-# Fonction : gestion des conditions de victoire des 3 sets : ........ ok
-# Fonction : décrémentation du score joueurs : ...................... ok
-# Fonction : décrémentation possible en cas de victoire : ........... ok
-# Fonction : plus de décrémentation en cas de 0-0 : ................. ok
-# Fonction : gestion conditions de retour en arrière des 3 sets : ... ok
-# Fonction : gestion des boutons poussoirs : ........................ ok
-# Fonction : sauvegarde des paramètres : ............................ ok
-# Fonction : restauration des paramètres : .......................... ok
-# Fonction : gestion choix des couleurs et de la luminosité : ....... ok
+# Date mise à jour : 09/04/2025
+#################################################################### Etat # Actif #####   
+# Fonction : Gestion touches +- RAZ des joueurs : ................... ok     Oui
+# Fonction : Gestion scores et des conditions de victoires : ........ ok     Oui
+# Fonction : Décrémentation possible en cas de victoire : ........... ok     Oui
+# Fonction : Sauvegarde, restauration scores et des paramètres : .... ok     Non
+# Fonction : Paramètres couleurs joueurs et luminosité globale : .... ok     Oui
+# Fonction : Communication score par ethernet : ..................... ok     Oui
+# Fonction : Luminosité automatique : ............................... xx     --
+# Fonction : Affichage informations de débogage sur écran oled : .... xx     --
+# Fonction : Mise à jour other the air : ............................ ok     Oui
+# Fonction : Gestion du score par smartphone : ...................... xx     --
+# Fonction : Gestion des modes de fonctionnement : .................. ok   Partiel
+#######################################################################################
+# A définir avec le client :
+#	Que faire en cas de non réponse d'un afficheur ?
+#	Comment choisir le mode smartphone, avec club house ou pupitre seul ?
+#	 
 
 import var
 import time
@@ -71,7 +76,7 @@ send_score()
 # if "True" in var.firstRun:
     # Première mise sous trension
 
-init_configuration()
+#init_configuration()
 
 while(True):
     ####################################################

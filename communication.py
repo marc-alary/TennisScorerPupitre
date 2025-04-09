@@ -61,7 +61,15 @@ def test_connexion():
           +afficheurs[5]+"  "
         write_ligne(message, 5)
         time.sleep(5)
-        
+
+def send_to_club_house():
+    try:
+        message = construire_score()
+        uart.write(message.encode())  # Envoi vers le CH9121
+        print("📤 Score envoyé via UART (CH9121):", message)
+    except Exception as e:
+        print("❌ Erreur UART:", e)
+
 def update_afficheurs_firmware():
     for i in range (0, 6):
         send_with_ack(var.adrMac[i], "U")
@@ -99,20 +107,10 @@ def send_score():
                 var.check=True
                 if joueur ==0:
                     send_with_ack(var.adrMac[jeux], data_convert(jeux))
-                    try:
-                        message = construire_score()
-                        uart.write(message.encode())  # Envoi vers le CH9121
-                        print("📤 Score envoyé via UART (CH9121):", message)
-                    except Exception as e:
-                        print("❌ Erreur UART:", e)
+                    send_to_club_house()
                 if joueur ==1:
                     send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
-                    try:
-                        message = construire_score()
-                        uart.write(message.encode())  # Envoi vers le CH9121
-                        print("📤 Score envoyé via UART (CH9121):", message)
-                    except Exception as e:
-                        print("❌ Erreur UART:", e)
+                    send_to_club_house()
                 var.oldScore[joueur][jeux] = var.score[joueur][jeux]
     if var.check is True:
         print("Sauvegarde ....")

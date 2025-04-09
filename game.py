@@ -157,6 +157,7 @@ def reset_game():
     var.setWin = [[0, 0, 0],[0, 0, 0]] 
     var.oldSetWin = [[0, 0, 0],[0, 0, 0]]
     sendall_to_everyone()
+    send_to_club_house()
     sleep(1)
     sleep(2)
     sleep(4)
