@@ -63,18 +63,29 @@ updateTest = f.read()
 f.close()
 if "True" in updateTest:
     # Envoi de U pour Update aux 6 afficheurs
+    print("Update afficheurs")
     update_afficheurs_firmware()
     f = open("update.txt", "w")
     f.write("False")
     f.close()
-
+    test_update()
+    clear_screen()
+    write_ligne(" Tennis Scorer ", 1)
+    write_ligne(" ------------- ", 2)
+    mes="Rev : " + version
+    write_ligne(mes, 3)
+    write_ligne("Etat afficheurs",4)
+    write_ligne("   | | | | |   ",5)
+    write_ligne(" ------------- ",6)
+    message = "  "+afficheurs[0]+"|"\
+          +afficheurs[1]+"|"\
+          +afficheurs[2]+"|"\
+          +afficheurs[3]+"|"\
+          +afficheurs[4]+"|"\
+          +afficheurs[5]+"  "
+    write_ligne(message, 5)
+    
 send_score()
-
-# f = open("run_number.txt", "r")
-# var.firstRun = f.read()
-# f.close()
-# if "True" in var.firstRun:
-    # Première mise sous trension
 
 #init_configuration()
 

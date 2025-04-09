@@ -38,6 +38,20 @@ def etat_afficheurs():
         time.sleep(5)
         return message
 
+def test_update():
+    clear_screen()
+    write_ligne("  Afficheurs   ",3)
+    write_ligne("  update in    ",4)
+    write_ligne(" progress ...  ",5)
+    afficheurs = [" "," "," "," "," "," "]
+    time.sleep(5)
+    while " " in afficheurs:
+        for i in range (0, 6):
+            if (e.send(var.adrMac[i], "black-0-0", True)) is True:
+                #print(i, "Ok")
+                afficheurs[i] = "X"
+        time.sleep(5)
+
 def test_connexion():
     while " " in afficheurs:
         for i in range (0, 6):
