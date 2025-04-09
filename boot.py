@@ -22,13 +22,16 @@ if BP_RESET_SCORE.value()==1:
         print("Connecting ...")
         essais = essais + 1
     if essais < 10:
+        f = open("update.txt", "w")
+        f.write("True")
+        f.close()
         try:
             ugit.pull_all()
-            f = open("update.txt", "w")
-            f.write("True")
-            f.close()
         except:
             print("Erreur de mise à jour !")
+            f = open("update.txt", "w")
+            f.write("False")
+            f.close()
             clear_screen()
             write_ligne("   Erreur de   ",3)
             write_ligne(" transfert !!! ",4)
