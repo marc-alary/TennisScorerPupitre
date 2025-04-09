@@ -17,14 +17,14 @@ if BP_RESET_SCORE.value()==1:
     clear_screen()
     write_ligne("Firmware update",3)
     write_ligne("in progress ...",4)
+    f = open("update.txt", "w")
+    f.write("True")
+    f.close()
     while not wlan.isconnected() and essais < 10:
         time.sleep(2)
         print("Connecting ...")
         essais = essais + 1
     if essais < 10:
-        f = open("update.txt", "w")
-        f.write("True")
-        f.close()
         try:
             ugit.pull_all()
         except:

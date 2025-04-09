@@ -47,9 +47,12 @@ def test_update():
     time.sleep(5)
     while " " in afficheurs:
         for i in range (0, 6):
-            if (e.send(var.adrMac[i], "black-0-0", True)) is True:
-                #print(i, "Ok")
-                afficheurs[i] = "X"
+            try:
+                if (e.send(var.adrMac[i], "black-0-0", True)) is True:
+                    #print(i, "Ok")
+                    afficheurs[i] = "X"
+            except:
+                afficheurs[i] = " "
         time.sleep(5)
 
 def test_connexion():
