@@ -56,3 +56,5 @@ check=False
 firstRun=True
 
 couleurs = ["red","green","blue","purple","yellow","orange","pink","cyan"]
+
+tick=0

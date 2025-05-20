@@ -1,5 +1,5 @@
 # Afficheur V5.0
-# Date mise à jour : 09/04/2025
+# Date mise à jour : 19/05/2025
 #################################################################### Etat # Actif #####   
 # Fonction : Gestion touches +- RAZ des joueurs : ................... ok     Oui
 # Fonction : Gestion scores et des conditions de victoires : ........ ok     Oui
@@ -8,15 +8,20 @@
 # Fonction : Paramètres couleurs joueurs et luminosité globale : .... ok     Oui
 # Fonction : Communication score par ethernet : ..................... ok     Oui
 # Fonction : Luminosité automatique : ............................... xx     --
-# Fonction : Affichage informations de débogage sur écran oled : .... xx     --
+# Fonction : Affichage informations de débogage sur écran oled : .... EC     Partiel
 # Fonction : Mise à jour other the air : ............................ ok     Oui
 # Fonction : Gestion du score par smartphone : ...................... xx     --
-# Fonction : Gestion des modes de fonctionnement : .................. ok   Partiel
+# Fonction : Gestion des modes de fonctionnement : .................. SO     --
 #######################################################################################
-# A définir avec le client :
-#	Que faire en cas de non réponse d'un afficheur ?
-#	Comment choisir le mode smartphone, avec club house ou pupitre seul ?
-#	 
+# Choix définis par le client :
+# 1 : Pas de démarage si un afficheur ne répond pas : ............... ok     OUI
+# 2 : Si un afficheur ne répond pas le pupitre affiche l'erreur ..... ok     OUI
+# 3 : Pas de sauvegarde EEprom score, choix couleur, luminosité : ... ok     OUI
+# 4 : Démarrage à 0-0 en rouge avec la luminosité à 1/3 : ........... ok     OUI
+# 5 : Le mode club house est toujours activé au démarrage : ......... ok     OUI
+# 6 : Mise à jour score club house sitôt après un changement de score ok     OUI
+# 7 : Sinon rafraichissement automatique paramétrable : ............. ok     OUI
+# 8 : 
 
 import var
 import time
@@ -26,7 +31,7 @@ from oled_display import *
 from game import *
 from serial_to_eth import *
 
-version = "20250409"
+version = "20250519"
 
 class switch(object):
     value = None
@@ -50,7 +55,9 @@ write_ligne("afficheurs.....",8)
 
 print("Attente des afficheurs ...")
 test_connexion()
-restore()
+# Plus de sauvegarde et de restauration des couleurs
+# de la luminosité et du score !
+#restore()
 
 print ("")
 print ("Pupitre TennisScorer Rev: " + version)
@@ -88,9 +95,14 @@ if "True" in updateTest:
     
 send_score()
 
-#init_configuration()
+init_configuration()
 
 while(True):
+    var.tick=var.tick+1
+    # 1000 tick = environs 10sec
+    if var.tick==50000:
+        var.tick=0
+        send_to_club_house()
     ####################################################
     # Test de l'état du système
     ####################################################    
@@ -178,7 +190,7 @@ while(True):
                         var.oldUserLum = var.userLum
                     sendall_to_everyone()
             var.etatSystem="RESET"
-            backup()
+            #backup()
             oled_system_state(var.etatSystem)
             break
         #######################################################

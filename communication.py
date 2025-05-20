@@ -18,8 +18,8 @@ afficheurs = [" "," "," "," "," "," "]
 
 for i in range (0, 6):
     e.add_peer(var.adrMac[i])
-#     print("Conecting with : ", var.adrMac[i])
-#     time.sleep(1)
+    #print("Conecting with : ", var.adrMac[i])
+    #time.sleep(1)
 
 def send_with_ack(peerAck, dataAck):
     essais = 0
@@ -125,12 +125,15 @@ def send_score():
                 if joueur ==0:
                     send_with_ack(var.adrMac[jeux], data_convert(jeux))
                     send_to_club_house()
+                    var.tick=0
                 if joueur ==1:
                     send_with_ack(var.adrMac[jeux+3], data_convert(jeux+3))
                     send_to_club_house()
+                    var.tick=0
                 var.oldScore[joueur][jeux] = var.score[joueur][jeux]
-    if var.check is True:
-        print("Sauvegarde ....")
+#     Fonction sauvegarde en EEprom non activée
+#     if var.check is True:
+#         print("Sauvegarde ....")
     var.oldSetNum=var.setNum
             #print ("Set", var.setNum, "J1", var.score[0], var.setWin[0], \
             #": J2", var.score[1], var.setWin[1])

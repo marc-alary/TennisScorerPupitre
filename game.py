@@ -29,37 +29,36 @@ def restore():
         print(f"Erreur : {e}")
 
 def backup():
-    pass
-#     for jeux in range(3):
-#         if var.oldScore[0][jeux] != var.score[0][jeux] \
-#         or var.oldScore[1][jeux] != var.score[1][jeux]:
-#             difference=difference + 1
-#         if var.oldColor[0] != var.color[0] or var.oldColor[1] != var.color[1] \
-#         or var.userLum != varOldUserLum or var.setNum != var.oldSetNum :
-#             difference=difference + 1
-#     if difference != 0:
-#         try:
-#             f=open('backup.txt', 'w')           
-#             f.write(str(var.color[0]))
-#             f.write(str(var.color[1]))
-#             f.write(str(var.userLum)+"\n")
-#             f.write(str(var.score[0][0]))
-#             f.write(str(var.score[0][1]))
-#             f.write(str(var.score[0][2]))
-#             f.write(str(var.score[1][0]))
-#             f.write(str(var.score[1][1]))
-#             f.write(str(var.score[1][2])+"\n")   
-#             f.write(str(var.setNum)+"\n")
-#             f.write(str(var.setWin[0][0]))
-#             f.write(str(var.setWin[0][1]))
-#             f.write(str(var.setWin[0][2]))
-#             f.write(str(var.setWin[1][0]))
-#             f.write(str(var.setWin[1][1]))
-#             f.write(str(var.setWin[1][2])+"\n")         
-#             f.write(var.etatSystem)
-#             f.close()
-#         except Exception as e:
-#             print(f"Erreur : {e}")
+    for jeux in range(3):
+        if var.oldScore[0][jeux] != var.score[0][jeux] \
+        or var.oldScore[1][jeux] != var.score[1][jeux]:
+            difference=difference + 1
+        if var.oldColor[0] != var.color[0] or var.oldColor[1] != var.color[1] \
+        or var.userLum != varOldUserLum or var.setNum != var.oldSetNum :
+            difference=difference + 1
+    if difference != 0:
+        try:
+            f=open('backup.txt', 'w')           
+            f.write(str(var.color[0]))
+            f.write(str(var.color[1]))
+            f.write(str(var.userLum)+"\n")
+            f.write(str(var.score[0][0]))
+            f.write(str(var.score[0][1]))
+            f.write(str(var.score[0][2]))
+            f.write(str(var.score[1][0]))
+            f.write(str(var.score[1][1]))
+            f.write(str(var.score[1][2])+"\n")   
+            f.write(str(var.setNum)+"\n")
+            f.write(str(var.setWin[0][0]))
+            f.write(str(var.setWin[0][1]))
+            f.write(str(var.setWin[0][2]))
+            f.write(str(var.setWin[1][0]))
+            f.write(str(var.setWin[1][1]))
+            f.write(str(var.setWin[1][2])+"\n")         
+            f.write(var.etatSystem)
+            f.close()
+        except Exception as e:
+            print(f"Erreur : {e}")
 
 def zero_test():
     # On regarde si tout est à zéro score et sets gagnés
